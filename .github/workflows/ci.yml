@@ -15,8 +15,12 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SERVER_2_HOST: ${{ secrets.SERVER_2_HOST }}
+
       run: |
-          ssh-keyscan $SERVER_2_HOST >> ~/.ssh/known_hosts
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/github_actions
-          chmod 600 ~/.ssh/github_actions
-          ssh -i ~/.ssh/github_actions $SSH_USERNAME@$SERVER_2_HOST "cd /docker-compose-flask-app && git pull && docker compose up -d --build"
+          mkdir -p /home/runner/.ssh
+          ssh-keyscan $SSH_HOST >> /home/runner/.ssh/known_hosts
+          echo "$SSH_PRIVATE_KEY" > /home/runner/.ssh/github_actions
+          chmod 600 /home/runner/.ssh/github_actions
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null	
+          ssh-add /home/runner/.ssh/github_actions
+          ssh $SSH_USERNAME@$SSH_HOST "echo 'Hello from GitHub Actions'"
