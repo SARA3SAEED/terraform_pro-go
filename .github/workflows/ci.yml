@@ -1,27 +1,24 @@
 name: Build and Run Go Program
 
-on:
-  push:
-    branches:
-      - main
+on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Set up Go
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.19'
-
-      - name: Build Go program
-        run: |
-          go build hello.go
-
-      - name: Run Go program
-        run: |
-          ./hello
+    steps:
+    - name: hostname
+      run: hostname
+    - name: Deploy to server 2
+      env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SERVER_2_HOST: ${{ secrets.SERVER_2_HOST }}
+      run: |
+          ssh-keyscan $SERVER_2_HOST >> ~/.ssh/known_hosts
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/github_actions
+          chmod 600 ~/.ssh/github_actions
+          ssh -i ~/.ssh/github_actions $SSH_USERNAME@$SERVER_2_HOST "cd /docker-compose-flask-app && git pull && docker compose up -d --build"
