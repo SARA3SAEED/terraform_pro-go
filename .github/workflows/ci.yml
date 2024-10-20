@@ -7,8 +7,6 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
-    steps:
     - name: hostname
       run: hostname
     - name: Deploy to server 2
