@@ -16,8 +16,13 @@ jobs:
           SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
           SERVER_2_HOST: ${{ secrets.SERVER_2_HOST }}
         run: |
-          ssh-keyscan $SERVER_2_HOST >> ~/.ssh/known_hosts
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/github_actions
-          chmod 600 ~/.ssh/github_actions
-          ssh -i ~/.ssh/github_actions $SSH_USERNAME@$SERVER_2_HOST "cd /docker-compose-flask-app && git pull && docker compose up -d --build"
-          
+            echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+            mkdir -p ~/.ssh
+            chmod 700 ~/.ssh
+            ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+            chmod 644 ~/.ssh/known_hosts
+            ssh-keyscan $SERVER_2_HOST >> ~/.ssh/known_hosts
+            echo "$SSH_PRIVATE_KEY" > ~/.ssh/github_actions
+            chmod 600 ~/.ssh/github_actions
+            ssh -i ~/.ssh/github_actions $SSH_USERNAME@$SERVER_2_HOST "cd /docker-compose-flask-app && git pull && docker compose up -d --build"
+            
